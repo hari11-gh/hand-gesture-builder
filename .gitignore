@@ -1,4 +1,15 @@
+# Python
 __pycache__/
 *.pyc
-.env
 venv/
+
+# Unity (VERY IMPORTANT)
+unity/Library/
+unity/Temp/
+unity/Logs/
+unity/Obj/
+unity/Build/
+
+# OS junk
+.DS_Store
+Thumbs.db

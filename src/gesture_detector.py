@@ -5,9 +5,9 @@ class GestureDetector:
         if len(landmarks) < 9:
             return False
 
-        x1, y1 = landmarks[4]   # thumb tip
-        x2, y2 = landmarks[8]   # index tip
+        x1, y1 = landmarks[4]   # thumb
+        x2, y2 = landmarks[8]   # index
 
         distance = math.hypot(x2 - x1, y2 - y1)
 
-        return distance < 40
+        return distance < 50  # slightly relaxed threshold
