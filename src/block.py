@@ -1,70 +1,100 @@
 import cv2
 
 class Block:
-    def __init__(self, x, y, size=80):
+    def __init__(self, x, y, size=60):
         self.x = x
         self.y = y
         self.size = size
-        self.dragging = False
 
     def draw(self, img):
-        # Glow border (futuristic vibe)
-        cv2.rectangle(
-            img,
-            (self.x - 5, self.y - 5),
-            (self.x + self.size + 5, self.y + self.size + 5),
-            (255, 0, 255),
-            1
-        )
+        overlay = img.copy()
 
-        # Main face
+        # ===== 1. HOLOGRAM FILL =====
         cv2.rectangle(
-            img,
+            overlay,
             (self.x, self.y),
             (self.x + self.size, self.y + self.size),
-            (255, 0, 100),
+            (255, 255, 0),
             -1
         )
 
-        # Top highlight
-        cv2.line(
+        # transparency blend
+        cv2.addWeighted(overlay, 0.18, img, 0.82, 0, img)
+
+        # ===== 2. DEPTH ILLUSION (fake 3D) =====
+        offset = 6
+
+        # top face
+        cv2.line(img,
+                 (self.x, self.y),
+                 (self.x + offset, self.y - offset),
+                 (255, 255, 0), 1)
+
+        cv2.line(img,
+                 (self.x + self.size, self.y),
+                 (self.x + self.size + offset, self.y - offset),
+                 (255, 255, 0), 1)
+
+        cv2.line(img,
+                 (self.x + offset, self.y - offset),
+                 (self.x + self.size + offset, self.y - offset),
+                 (255, 255, 0), 1)
+
+        # side face
+        cv2.line(img,
+                 (self.x + self.size, self.y),
+                 (self.x + self.size + offset, self.y - offset),
+                 (255, 255, 0), 1)
+
+        cv2.line(img,
+                 (self.x + self.size, self.y + self.size),
+                 (self.x + self.size + offset, self.y + self.size - offset),
+                 (255, 255, 0), 1)
+
+        cv2.line(img,
+                 (self.x + self.size + offset, self.y - offset),
+                 (self.x + self.size + offset, self.y + self.size - offset),
+                 (255, 255, 0), 1)
+
+        # ===== 3. GLOW EFFECT =====
+        for i in range(8, 0, -2):
+            cv2.rectangle(
+                img,
+                (self.x - i, self.y - i),
+                (self.x + self.size + i, self.y + self.size + i),
+                (255, 255, 0),
+                1
+            )
+
+        # ===== 4. MAIN BORDER =====
+        cv2.rectangle(
             img,
             (self.x, self.y),
-            (self.x + self.size, self.y),
-            (255, 255, 255),
+            (self.x + self.size, self.y + self.size),
+            (255, 255, 0),
             2
         )
 
-        # Left highlight
-        cv2.line(
-            img,
+        # ===== 5. TECH GRID (inside) =====
+        step = self.size // 3
+        for i in range(1, 3):
+            # vertical lines
+            cv2.line(img,
+                     (self.x + i * step, self.y),
+                     (self.x + i * step, self.y + self.size),
+                     (255, 255, 0), 1)
+
+            # horizontal lines
+            cv2.line(img,
+                     (self.x, self.y + i * step),
+                     (self.x + self.size, self.y + i * step),
+                     (255, 255, 0), 1)
+
+        # ===== 6. CORNER NODES =====
+        for (px, py) in [
             (self.x, self.y),
-            (self.x, self.y + self.size),
-            (255, 255, 255),
-            2
-        )
-
-        # Bottom shadow
-        cv2.line(
-            img,
-            (self.x, self.y + self.size),
-            (self.x + self.size, self.y + self.size),
-            (50, 0, 50),
-            2
-        )
-
-        # Right shadow
-        cv2.line(
-            img,
             (self.x + self.size, self.y),
-            (self.x + self.size, self.y + self.size),
-            (50, 0, 50),
-            2
-        )
-
-    def update(self, cursor_x, cursor_y, dragging):
-        if dragging:
-            if (self.x < cursor_x < self.x + self.size and
-                self.y < cursor_y < self.y + self.size):
-                self.x = cursor_x - self.size // 2
-                self.y = cursor_y - self.size // 2
+            (self.x, self.y + self.size),
+            (self.x + self.size, self.y + self.size)
+        ]:
+            cv2.circle(img, (px, py), 4, (255, 255, 255), -1)
